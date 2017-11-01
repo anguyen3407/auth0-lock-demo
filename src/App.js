@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import axios from 'axios';
+import Auth0Lock from 'auth0-lock';
 
 class App extends Component {
   state = {
@@ -9,8 +10,22 @@ class App extends Component {
     secureDataResponse: null
   };
 
-  login = () => {
+
+  componentDidMount() {
+        this.lock = new Auth0Lock( process.env.REACT_APP_AUTH0_CLIENT_ID, process.env.REACT_APP_AUTH0_DOMAIN )
+        this.lock.on('authenticated', this.onAuthenticated)
+      }
     
+      onAuthenticated = (authResult) => {
+    console.log('authResult', authResult);
+    axios.post('login', { idToken: authResult.idToken }).then(response => {
+      this.setState({ user: response.data })
+    })
+      }
+
+
+  login = () => {
+    this.lock.show();
   };
 
   logout = () => {
